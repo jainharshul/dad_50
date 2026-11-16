@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dad's 50th Present</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Layout idea: one centred "delivery slip" card on a deep wine night, a marigold toran hanging across the top;
+     the final view opens the card into a scrolling celebration with petals falling behind it. Single theme by choice. */
+  --wine:#2b0a17;
+  --wine-2:#4a1226;
+  --marigold:#f6a21c;
+  --saffron:#ffcf5a;
+  --rose:#e8557a;
+  --cream:#fff3dd;
+  --muted:#d9b9a8;
+  --display:"Rozha One","Georgia",serif;
+  --body:"Mukta","Segoe UI",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:radial-gradient(120% 90% at 50% 0%,var(--wine-2) 0%,var(--wine) 62%) fixed,var(--wine);
+  color:var(--cream);font-family:var(--body);font-size:18px;line-height:1.5;overflow-x:hidden;
+}
+canvas#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+
+/* toran: marigold garland across the top */
+.toran{position:fixed;top:0;left:0;right:0;height:64px;z-index:3;pointer-events:none;display:flex;justify-content:center;gap:2px;overflow:hidden}
+.toran i{flex:0 0 26px;height:26px;border-radius:50%;margin-top:calc(var(--d)*1px);
+  background:radial-gradient(circle at 35% 35%,var(--saffron),var(--marigold) 60%,#c96a00);
+  box-shadow:0 2px 6px rgba(0,0,0,.35);transform-origin:50% -40px;animation:sway 4s ease-in-out infinite;animation-delay:calc(var(--i)*-0.17s)}
+.toran i:nth-child(3n){background:radial-gradient(circle at 35% 35%,#fff0a8,var(--saffron) 60%,#d99a00)}
+.toran i:nth-child(7n){background:radial-gradient(circle at 35% 35%,#ff9bb3,var(--rose) 60%,#a82a4d)}
+@keyframes sway{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+
+main{position:relative;z-index:2;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:92px 16px 40px}
+.card{width:min(560px,100%);background:linear-gradient(180deg,rgba(255,243,221,.07),rgba(255,243,221,.03));
+  border:1px solid rgba(255,207,90,.28);border-radius:22px;padding:30px 28px 28px;box-shadow:0 24px 60px rgba(0,0,0,.45);
+  display:flex;flex-direction:column;gap:18px}
+.step{display:none;flex-direction:column;gap:18px}
+.step.on{display:flex;animation:rise .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:.0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.eyebrow{font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:14px;color:var(--saffron)}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;line-height:1.08;text-wrap:balance}
+h1{font-size:clamp(40px,9vw,60px)}
+h2{font-size:clamp(28px,6.4vw,38px)}
+p{margin:0;color:var(--cream)}
+.sub{color:var(--muted)}
+.photo{width:100%;max-height:300px;object-fit:cover;border-radius:14px;border:3px solid var(--cream);display:block}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+button{font:inherit;cursor:pointer}
+.opt{padding:14px 14px;border-radius:14px;border:1.5px solid rgba(255,207,90,.4);background:rgba(43,10,23,.55);color:var(--cream);
+  font-weight:500;text-align:center;transition:transform .15s,background .15s,border-color .15s}
+.opt:hover{background:rgba(246,162,28,.18);border-color:var(--saffron);transform:translateY(-2px)}
+.opt.no{animation:shake .4s;border-color:var(--rose);background:rgba(232,85,122,.2)}
+.opt.yes{background:var(--marigold);color:var(--wine);border-color:var(--saffron);font-weight:700}
+@keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.cta{align-self:flex-start;padding:15px 26px;border-radius:999px;border:0;background:linear-gradient(180deg,var(--saffron),var(--marigold));
+  color:var(--wine);font-weight:700;font-size:19px;box-shadow:0 8px 22px rgba(246,162,28,.35);transition:transform .15s}
+.cta:hover{transform:translateY(-2px) scale(1.02)}
+button:focus-visible,a:focus-visible,video:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
+.hint{min-height:1.5em;color:var(--saffron);font-weight:500}
+.diyas{display:flex;gap:10px;align-items:center}
+.diyas span{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(255,207,90,.55);transition:all .4s}
+.diyas span.lit{background:var(--saffron);box-shadow:0 0 14px 4px rgba(255,207,90,.6);border-color:var(--saffron)}
+.diyas em{font-style:normal;font-size:14px;color:var(--muted);margin-left:6px}
+
+/* gift box */
+.giftwrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0}
+.gift{width:170px;height:170px;position:relative;border:0;background:none;padding:0;transition:transform .12s}
+.gift .box{position:absolute;left:10px;right:10px;bottom:0;height:112px;border-radius:10px;background:linear-gradient(180deg,var(--rose),#b8305a)}
+.gift .lid{position:absolute;left:0;right:0;top:34px;height:34px;border-radius:8px;background:linear-gradient(180deg,#ff7d9d,var(--rose));box-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.gift .rib{position:absolute;left:50%;top:34px;bottom:0;width:26px;margin-left:-13px;background:linear-gradient(90deg,var(--marigold),var(--saffron),var(--marigold))}
+.gift .bow{position:absolute;left:50%;top:4px;width:84px;height:36px;margin-left:-42px}
+.gift .bow::before,.gift .bow::after{content:"";position:absolute;top:0;width:40px;height:34px;border:8px solid var(--saffron);border-radius:50% 50% 0 50%}
+.gift .bow::before{left:0;transform:rotate(-8deg)}.gift .bow::after{right:0;transform:scaleX(-1) rotate(-8deg)}
+.gift.t1{transform:rotate(-3deg)}.gift.t2{transform:rotate(4deg) scale(1.04)}.gift.t3{transform:rotate(-6deg) scale(1.08)}.gift.t4{transform:rotate(7deg) scale(1.12)}
+.gift.wob{animation:wob .35s}
+@keyframes wob{25%{rotate:-8deg}75%{rotate:8deg}}
+.gift.open .lid{transform:translateY(-70px) rotate(-18deg)}
+.gift.open .bow{transform:translateY(-70px) rotate(-18deg);transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+
+/* final */
+body.party main{justify-content:flex-start}
+body.party .card{width:min(980px,100%);align-items:center;text-align:center;gap:22px;padding:34px 22px 34px}
+.final h1{font-size:clamp(46px,10vw,104px);
+  background:linear-gradient(100deg,var(--marigold) 0%,var(--saffron) 30%,#fff7d6 48%,var(--saffron) 62%,var(--marigold) 100%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4.5s linear infinite}
+@keyframes shine{from{background-position:120% 0}to{background-position:-100% 0}}
+.fifty{font-family:var(--display);font-size:clamp(90px,22vw,200px);line-height:.8;color:var(--rose);text-shadow:0 0 40px rgba(232,85,122,.45);animation:pop 1s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.2) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+.frame{width:100%;padding:8px;border-radius:20px;background:linear-gradient(135deg,var(--marigold),var(--rose),var(--saffron));box-shadow:0 0 0 0 rgba(255,207,90,.5);animation:glow 2.8s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 46px 6px rgba(255,207,90,.35)}}
+video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:16/9}
+.letter{max-width:62ch;text-align:left;font-size:20px;display:flex;flex-direction:column;gap:12px}
+.letter .sig{font-family:var(--display);font-size:30px;color:var(--saffron)}
+.again{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="petals" aria-hidden="true"></canvas>
+<div class="toran" id="toran" aria-hidden="true"></div>
+<main>
+  <div class="card" id="card">
+
+    <section class="step on" data-step="0">
+      <div class="eyebrow">Special delivery</div>
+      <h1>One present, addressed to Dad</h1>
+      <p>It is locked. Only the real Dad can open it, so there are four quick questions and one last job before you get it.</p>
+      <p class="sub">Turn your sound on first.</p>
+      <button class="cta" id="start" type="button">Start unlocking</button>
+    </section>
+
+    <section class="step" data-step="1">
+      <h2>Security check. How old are you turning?</h2>
+      <div class="opts">
+        <button class="opt" type="button" data-msg="Nice try. The cake says otherwise.">29, again</button>
+        <button class="opt" type="button" data-msg="You wish, Dad.">39</button>
+        <button class="opt" type="button" data-ok="1">The big 50</button>
+        <button class="opt" type="button" data-msg="No secrets today. Try again.">Not telling</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="2">
+      <img class="photo" src="p03.jpg" alt="The two of us at a restaurant with a huge dosa on the table">
+      <h2>Whenever we are together, what do we always end up doing?</h2>
+      <div class="opts">
+        <button class="opt" type="button" data-msg="Dieting? In this family?">Dieting</button>
+        <button class="opt" type="button" data-ok="1">Eating everything</button>
+        <button class="opt" type="button" data-msg="We have never skipped dinner in our lives.">Skipping dinner</button>
+        <button class="opt" type="button" data-msg="Nobody is counting anything.">Counting calories</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="3">
+      <img class="photo" src="p20.jpg" alt="Dad leaning back with his feet up at the casino">
+      <h2>Feet up at the casino. How does it end every time?</h2>
+      <div class="opts">
+        <button class="opt" type="button" data-msg="In your dreams, Dad.">Jackpot</button>
+        <button class="opt" type="button" data-msg="Be honest.">Breaking even</button>
+        <button class="opt" type="button" data-ok="1">Losing, LOL</button>
+        <button class="opt" type="button" data-msg="We have photo evidence.">I never gamble</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="4">
+      <img class="photo" src="p12.jpg" alt="Dad flexing both arms in the mirror" style="object-position:50% 30%">
+      <h2>Who is the strongest man in the house?</h2>
+      <div class="opts">
+        <button class="opt" type="button" data-ok="1">Me, obviously</button>
+        <button class="opt" type="button" id="dodge" data-msg="You cannot pick that one. Look at those arms.">Someone else</button>
+      </div>
+    </section>
+
+    <section class="step" data-step="5">
+      <h2>You passed. Now unwrap it.</h2>
+      <p class="sub">Make a wish, then tap the present five times.</p>
+      <div class="giftwrap">
+        <button class="gift" id="gift" type="button" aria-label="Tap the present to unwrap it">
+          <span class="box"></span><span class="rib"></span><span class="lid"></span><span class="bow"></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="step final" data-step="6">
+      <div class="fifty" aria-hidden="true">50</div>
+      <h1>Happy Birthday, Dad</h1>
+      <p>Your present is a little film about you. Press play.</p>
+      <div class="frame">
+        <video id="film" controls playsinline preload="metadata" poster="poster.jpg" src="video.mp4"></video>
+      </div>
+      <div class="letter">
+        <p>You carry a burden we cannot fathom every single day, yet you carry yourself with a smile and a positive attitude.</p>
+        <p>Thank you for being such an amazing role model and influence. I am so lucky to be raised by you. You fill our home with happiness.</p>
+        <p class="sig">Thank you so much, Dad.</p>
+      </div>
+      <button class="again" id="again" type="button">Lock it up and play again</button>
+    </section>
+
+    <div class="hint" id="hint" role="status" aria-live="polite"></div>
+    <div class="diyas" id="diyas" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><em id="count">0 of 5 unlocked</em></div>
+  </div>
+</main>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(s){return document.querySelector(s)};
+  var steps = [].slice.call(document.querySelectorAll('.step'));
+  var hint = $('#hint'), diyas = [].slice.call(document.querySelectorAll('#diyas span')), count = $('#count');
+  var state = {step:0}, taps = 0;
+
+  // toran
+  var t = $('#toran'), n = Math.ceil(window.innerWidth/28)+4, html='';
+  for(var i=0;i<n;i++){ html += '<i style="--i:'+i+';--d:'+Math.round(10+16*Math.abs(Math.sin(i*Math.PI/8)))+'"></i>'; }
+  t.innerHTML = html;
+
+  function show(k){
+    state.step = k; taps = 0;
+    steps.forEach(function(s){ s.classList.toggle('on', +s.dataset.step===k) });
+    hint.textContent = '';
+    var done = Math.max(0, Math.min(5, k-1));
+    diyas.forEach(function(d,i){ d.classList.toggle('lit', i<done) });
+    count.textContent = done+' of 5 unlocked';
+    $('#diyas').style.display = (k===0||k===6)?'none':'flex';
+    hint.style.display = (k===0||k===6)?'none':'block';
+    document.body.classList.toggle('party', k===6);
+    var g = $('#gift'); g.className = 'gift';
+    if(k===6){ party(); } else { rate = 0.25; }
+    window.scrollTo(0,0);
+  }
+
+  $('#start').addEventListener('click', function(){ show(1) });
+  $('#again').addEventListener('click', function(){ try{$('#film').pause()}catch(e){} show(0) });
+
+  document.querySelectorAll('.opt').forEach(function(b){
+    b.addEventListener('click', function(){
+      if(b.dataset.ok){
+        b.classList.add('yes'); hint.textContent = 'Correct.'; burst(24);
+        setTimeout(function(){ b.classList.remove('yes'); show(state.step+1) }, 750);
+      } else {
+        b.classList.remove('no'); void b.offsetWidth; b.classList.add('no');
+        hint.textContent = b.dataset.msg || 'Try again.';
+      }
+    });
+  });
+
+  // the wrong answer runs away
+  var dodge = $('#dodge'), hops = 0;
+  function hop(){
+    if(reduce || hops>7) return;
+    hops++;
+    dodge.style.transform = 'translate('+((Math.random()*2-1)*90).toFixed(0)+'px,'+((Math.random()*2-1)*50).toFixed(0)+'px) rotate('+((Math.random()*2-1)*10).toFixed(0)+'deg)';
+    hint.textContent = 'That answer keeps running away.';
+  }
+  dodge.addEventListener('pointerenter', hop);
+
+  $('#gift').addEventListener('click', function(){
+    var g = this; taps++;
+    burst(10+taps*6);
+    if(taps<5){
+      g.className = 'gift t'+Math.min(taps,4); void g.offsetWidth; g.classList.add('wob');
+      hint.textContent = (5-taps)+' more';
+    } else {
+      g.className = 'gift open'; hint.textContent = '';
+      var v = $('#film');
+      setTimeout(function(){ show(6); var p; try{ p = v.play(); if(p&&p.catch) p.catch(function(){}) }catch(e){} }, 650);
+    }
+  });
+
+  // ---------- petals ----------
+  var cv = $('#petals'), cx = cv.getContext('2d'), W=0, H=0, dpr = Math.min(window.devicePixelRatio||1, 2);
+  var P = [], rate = 0.25, max = reduce ? 30 : 170;
+  var cols = [['#ffcf5a','#f6a21c'],['#f6a21c','#d97706'],['#ff9bb3','#e8557a'],['#e8557a','#b8305a'],['#fff0a8','#ffcf5a']];
+  function size(){ W = cv.width = innerWidth*dpr; H = cv.height = innerHeight*dpr }
+  size(); addEventListener('resize', size);
+  function petal(x,y,vx,vy){
+    var c = cols[(Math.random()*cols.length)|0], flower = Math.random()<0.28;
+    return {x:x,y:y,vx:vx,vy:vy,r:(flower?9:7+Math.random()*9)*dpr,a:Math.random()*6.28,va:(Math.random()-.5)*.06,ph:Math.random()*6.28,c:c,f:flower,sq:.5+Math.random()*.5};
+  }
+  function spawn(){ if(P.length<max) P.push(petal(Math.random()*W,-20*dpr,(Math.random()-.5)*.6*dpr,(1+Math.random()*1.6)*dpr)) }
+  function burst(k){
+    if(reduce) k = Math.min(k,8);
+    for(var i=0;i<k;i++){ var an = Math.random()*6.28, sp = (3+Math.random()*7)*dpr; P.push(petal(W/2,H*0.45,Math.cos(an)*sp,Math.sin(an)*sp-4*dpr)) }
+  }
+  function party(){ rate = reduce ? 0.15 : 2.2; burst(120); setTimeout(function(){burst(80)},500) }
+  function draw(p){
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a);
+    var g = cx.createRadialGradient(0,0,0,0,0,p.r); g.addColorStop(0,p.c[0]); g.addColorStop(1,p.c[1]); cx.fillStyle = g;
+    if(p.f){ // marigold: ring of round petals
+      for(var i=0;i<8;i++){ cx.rotate(Math.PI/4); cx.beginPath(); cx.arc(p.r*.55,0,p.r*.48,0,6.28); cx.fill() }
+      cx.beginPath(); cx.arc(0,0,p.r*.5,0,6.28); cx.fillStyle = p.c[1]; cx.fill();
+    } else {   // single petal, squashed to fake a tumble
+      cx.scale(1, p.sq*(.55+.45*Math.sin(p.ph)));
+      cx.beginPath(); cx.moveTo(0,-p.r); cx.bezierCurveTo(p.r*.9,-p.r*.6,p.r*.7,p.r*.8,0,p.r); cx.bezierCurveTo(-p.r*.7,p.r*.8,-p.r*.9,-p.r*.6,0,-p.r); cx.fill();
+    }
+    cx.restore();
+  }
+  var acc = 0;
+  function tick(){
+    cx.clearRect(0,0,W,H);
+    acc += rate; while(acc>=1){ spawn(); acc-- }
+    for(var i=P.length-1;i>=0;i--){
+      var p = P[i]; p.ph += .05; p.a += p.va;
+      p.vy += (1.6*dpr - p.vy)*.02; p.vx += (Math.sin(p.ph*.6)*.9*dpr - p.vx)*.03;
+      p.x += p.vx; p.y += p.vy;
+      if(p.y>H+30*dpr || p.x<-60*dpr || p.x>W+60*dpr){ P.splice(i,1); continue }
+      draw(p);
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // keep the viewer's place across a republish
+  function start(d){ show(d && typeof d.step==='number' ? d.step : 0) }
+  try{ window.claude && window.claude.hot && window.claude.hot.snapshot && window.claude.hot.snapshot(function(){return state}) }catch(e){}
+  if(window.claude && window.claude.hot && window.claude.hot.ready){ window.claude.hot.ready(start) } else { start((window.claude && window.claude.hot && window.claude.hot.data) || {}) }
+})();
+</script>
+</body>
+</html>
