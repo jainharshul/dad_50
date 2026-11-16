@@ -24,9 +24,12 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{
-  background:radial-gradient(120% 90% at 50% 0%,var(--wine-2) 0%,var(--wine) 62%) fixed,var(--wine);
+  background:var(--wine);
   color:var(--cream);font-family:var(--body);font-size:18px;line-height:1.5;overflow-x:hidden;
+  -webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-tap-highlight-color:transparent;
 }
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 0%,var(--wine-2) 0%,var(--wine) 62%)}
 canvas#petals{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 
 /* toran: marigold garland across the top */
@@ -53,17 +56,18 @@ p{margin:0;color:var(--cream)}
 .sub{color:var(--muted)}
 .photo{width:100%;max-height:300px;object-fit:cover;border-radius:14px;border:3px solid var(--cream);display:block}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;position:relative}
-@media (max-width:420px){.opts{grid-template-columns:1fr}}
-button{font:inherit;cursor:pointer}
+@media (max-width:330px){.opts{grid-template-columns:1fr}}
+button{font:inherit;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .opt{padding:14px 14px;border-radius:14px;border:1.5px solid rgba(255,207,90,.4);background:rgba(43,10,23,.55);color:var(--cream);
   font-weight:500;text-align:center;transition:transform .15s,background .15s,border-color .15s}
-.opt:hover{background:rgba(246,162,28,.18);border-color:var(--saffron);transform:translateY(-2px)}
+@media (hover:hover){.opt:hover{background:rgba(246,162,28,.18);border-color:var(--saffron);transform:translateY(-2px)}}
+#dodge{position:relative;z-index:2}
 .opt.no{animation:shake .4s;border-color:var(--rose);background:rgba(232,85,122,.2)}
 .opt.yes{background:var(--marigold);color:var(--wine);border-color:var(--saffron);font-weight:700}
 @keyframes shake{20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .cta{align-self:flex-start;padding:15px 26px;border-radius:999px;border:0;background:linear-gradient(180deg,var(--saffron),var(--marigold));
   color:var(--wine);font-weight:700;font-size:19px;box-shadow:0 8px 22px rgba(246,162,28,.35);transition:transform .15s}
-.cta:hover{transform:translateY(-2px) scale(1.02)}
+@media (hover:hover){.cta:hover{transform:translateY(-2px) scale(1.02)}}
 button:focus-visible,a:focus-visible,video:focus-visible{outline:3px solid var(--cream);outline-offset:3px}
 .hint{min-height:1.5em;color:var(--saffron);font-weight:500}
 .diyas{display:flex;gap:10px;align-items:center}
@@ -101,6 +105,21 @@ video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:1
 .letter{max-width:62ch;text-align:left;font-size:20px;display:flex;flex-direction:column;gap:12px}
 .letter .sig{font-family:var(--display);font-size:30px;color:var(--saffron)}
 .again{background:none;border:0;color:var(--muted);text-decoration:underline;font-size:16px}
+/* phones */
+@media (max-width:480px){
+  body{font-size:17px}
+  main{padding:66px 12px 28px;justify-content:flex-start}
+  .toran{height:48px}.toran i{flex-basis:20px;height:20px}
+  .card{padding:20px 16px 18px;gap:14px;border-radius:18px}
+  .step{gap:14px}
+  .photo{max-height:min(230px,30vh)}
+  .opt{padding:12px 8px;font-size:16px;line-height:1.25;display:flex;align-items:center;justify-content:center;min-height:56px}
+  .cta{align-self:stretch}
+  .gift{width:150px;height:150px}
+  body.party .card{padding:22px 10px 24px;gap:16px}
+  .frame{padding:5px;border-radius:14px}video{border-radius:10px}
+  .letter{font-size:18px;padding:0 6px}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -198,7 +217,7 @@ video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:1
   var state = {step:0}, taps = 0;
 
   // toran
-  var t = $('#toran'), n = Math.ceil(window.innerWidth/28)+4, html='';
+  var t = $('#toran'), n = Math.ceil(Math.max(window.innerWidth,window.innerHeight)/22)+4, html='';
   for(var i=0;i<n;i++){ html += '<i style="--i:'+i+';--d:'+Math.round(10+16*Math.abs(Math.sin(i*Math.PI/8)))+'"></i>'; }
   t.innerHTML = html;
 
@@ -222,6 +241,7 @@ video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:1
 
   document.querySelectorAll('.opt').forEach(function(b){
     b.addEventListener('click', function(){
+      if(b===dodge && skipTap){ skipTap = false; return }
       if(b.dataset.ok){
         b.classList.add('yes'); hint.textContent = 'Correct.'; burst(24);
         setTimeout(function(){ b.classList.remove('yes'); show(state.step+1) }, 750);
@@ -237,10 +257,17 @@ video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:1
   function hop(){
     if(reduce || hops>7) return;
     hops++;
-    dodge.style.transform = 'translate('+((Math.random()*2-1)*90).toFixed(0)+'px,'+((Math.random()*2-1)*50).toFixed(0)+'px) rotate('+((Math.random()*2-1)*10).toFixed(0)+'deg)';
+    var rx = Math.min(90, innerWidth*0.16), sx = Math.random()<.5?-1:1, sy = Math.random()<.5?-1:1;
+    dodge.style.transition = 'none'; dodge.style.transform = 'none';
+    var r = dodge.getBoundingClientRect(), dx = sx*(rx*.5+Math.random()*rx*.5);
+    dx = Math.max(10 - r.left, Math.min(innerWidth - 10 - r.right, dx));   // never leave the screen
+    void dodge.offsetWidth; dodge.style.transition = 'transform .18s';
+    dodge.style.transform = 'translate('+dx.toFixed(0)+'px,'+(sy*(22+Math.random()*26)).toFixed(0)+'px) rotate('+((Math.random()*2-1)*10).toFixed(0)+'deg)';
     hint.textContent = 'That answer keeps running away.';
   }
-  dodge.addEventListener('pointerenter', hop);
+  var skipTap = false;
+  dodge.addEventListener('pointerenter', function(e){ if(e.pointerType==='mouse') hop() });
+  dodge.addEventListener('pointerdown', function(e){ if(e.pointerType!=='mouse' && !reduce && hops<5){ hop(); skipTap = true } });
 
   $('#gift').addEventListener('click', function(){
     var g = this; taps++;
@@ -250,14 +277,15 @@ video{width:100%;display:block;border-radius:13px;background:#000;aspect-ratio:1
       hint.textContent = (5-taps)+' more';
     } else {
       g.className = 'gift open'; hint.textContent = '';
-      var v = $('#film');
-      setTimeout(function(){ show(6); var p; try{ p = v.play(); if(p&&p.catch) p.catch(function(){}) }catch(e){} }, 650);
+      // start the film inside the tap itself so iPhone allows sound without another press
+      var v = $('#film'), p; try{ v.currentTime = 0; p = v.play(); if(p&&p.catch) p.catch(function(){}) }catch(e){}
+      setTimeout(function(){ show(6) }, 650);
     }
   });
 
   // ---------- petals ----------
   var cv = $('#petals'), cx = cv.getContext('2d'), W=0, H=0, dpr = Math.min(window.devicePixelRatio||1, 2);
-  var P = [], rate = 0.25, max = reduce ? 30 : 170;
+  var P = [], rate = 0.25, max = reduce ? 30 : (innerWidth<500 ? 100 : 170);
   var cols = [['#ffcf5a','#f6a21c'],['#f6a21c','#d97706'],['#ff9bb3','#e8557a'],['#e8557a','#b8305a'],['#fff0a8','#ffcf5a']];
   function size(){ W = cv.width = innerWidth*dpr; H = cv.height = innerHeight*dpr }
   size(); addEventListener('resize', size);
